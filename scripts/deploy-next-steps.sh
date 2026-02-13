@@ -1,0 +1,15 @@
+#!/usr/bin/env bash
+# npm run export のあとに表示する「次にやること」
+echo ""
+echo "=========================================="
+echo "  次にやること（デプロイの残り2ステップ）"
+echo "=========================================="
+echo ""
+echo "1. このフォルダの「public_html」を、サーバーの marche-link.jp の中にアップロードする"
+echo "   → サーバーに marche-link.jp/public_html/ ができるようにする（フォルダごと上げる）"
+echo ""
+echo "2. サーバーで次を実行する:"
+echo "   cd marche-link.jp"
+echo "   ./deploy-static.sh"
+echo ""
+echo "=========================================="

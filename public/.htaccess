@@ -1,0 +1,10 @@
+# Xserver 等で静的サイト（index.html）を表示するための設定
+# public/ にあり、ビルドで out/ → export で public_html/ にコピーされます
+DirectoryIndex index.html
+
+# 全ページで React（Next.js）のハイドレーションが動くよう script-src に unsafe-eval を許可
+# サーバー側で別の CSP が付いている場合は「より厳しい方」が効くため、先に削除してから自前の CSP を付与
+<IfModule mod_headers.c>
+Header unset Content-Security-Policy
+Header always set Content-Security-Policy "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; font-src 'self' data:; connect-src 'self' https:;"
+</IfModule>
