@@ -2,9 +2,44 @@
 # public/ にあり、ビルドで out/ → export で public_html/ にコピーされます
 DirectoryIndex index.html
 
+# スラッシュなし → あり（Next.js trailingSlash: true と LIFF Endpoint URL を一致させる）
+# /admin や /admin/products で 404 にならないようにする
+# liff.state=/products/ 等がパスと結合され /admin/products/products/ になる不具合対策
+<IfModule mod_rewrite.c>
+RewriteEngine On
+RewriteBase /
+# メンテナンスモード: ドキュメントルートに maintenance.flag がある間は全アクセスを maintenance.php へ
+RewriteCond %{DOCUMENT_ROOT}/maintenance.flag -f
+RewriteCond %{REQUEST_URI} !^/maintenance\.php$
+RewriteRule ^(.*)$ /maintenance.php [L]
+# /order/ で shop= があるときは PHP で動的 OGP を出す
+RewriteCond %{QUERY_STRING} shop= [NC]
+RewriteRule ^order/?$ order/index.php [L,QSA]
+# /admin および /admin/ は PHP で OGP 付き HTML を返し、LINE プレビューで画像を確実に表示
+RewriteRule ^admin/?$ admin/index.php [L]
+# /admin-entry および /admin-entry/ は PHP で OGP（ogp.png）を差し込み、管理 LIFF 共有プレビューで画像を表示
+RewriteRule ^admin-entry/?$ admin-entry/index.php [L]
+# /admin-login および /admin-login/ は PHP で OGP または LIFF へ 302（管理画面ログイン用リンク）
+RewriteRule ^admin-login/?$ admin-login/index.php [L,QSA]
+# 誤って二重パスでリクエストされた場合は /admin/products/ へ
+RewriteRule ^admin/products/products/?$ /admin/products/ [R=301,L]
+RewriteRule ^admin/products/admin/products/?$ /admin/products/ [R=301,L]
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_URI} !/$
+RewriteRule ^(.*)$ /$1/ [R=301,L]
+</IfModule>
+
+# 再デプロイ後にユーザーがすぐ新 HTML を取得するよう、HTML のみキャッシュを抑制（真っ白画面・404 対策）
+<IfModule mod_headers.c>
+<FilesMatch "\.html?$">
+Header set Cache-Control "no-cache, max-age=0, must-revalidate"
+</FilesMatch>
+</IfModule>
+
 # 全ページで React（Next.js）のハイドレーションが動くよう script-src に unsafe-eval を許可
+# LIFF 用に script-src に LINE CDN（static.line-scdn.net）を許可（CSP 違反で「Unable to load client features」が出るため）
 # サーバー側で別の CSP が付いている場合は「より厳しい方」が効くため、先に削除してから自前の CSP を付与
 <IfModule mod_headers.c>
 Header unset Content-Security-Policy
-Header always set Content-Security-Policy "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; font-src 'self' data:; connect-src 'self' https:;"
+Header always set Content-Security-Policy "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://static.line-scdn.net; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; font-src 'self' data:; connect-src 'self' https:; frame-src 'self' https://liff.line.me;"
 </IfModule>
