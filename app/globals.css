@@ -1,0 +1,38 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Full height layout */
+html {
+  height: 100%;
+  width: 100%;
+}
+
+body {
+  min-height: 100vh;
+  min-height: -webkit-fill-available;
+  width: 100%;
+  margin: 0;
+  padding: 0;
+}
+
+/* Prevent overscroll bounce on iOS */
+body {
+  overscroll-behavior: none;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Prevent pull-to-refresh and viewport shifting */
+html {
+  touch-action: manipulation;
+  -webkit-touch-callout: none;
+}
+
+/* Safe area insets for notched devices */
+.safe-top {
+  padding-top: env(safe-area-inset-top);
+}
+
+.safe-bottom {
+  padding-bottom: env(safe-area-inset-bottom);
+}
